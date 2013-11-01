@@ -359,6 +359,8 @@ var showAircraftPayloadDialog = func {
 
 var moduleInit = func {
 
+    print("[fgpassengers] module init");
+
     setprop("/fgpassengers/start", 0);
 
     var FG_ROOT = getprop("/sim/fg-root");
@@ -372,7 +374,9 @@ var moduleInit = func {
 
     var aircraft = getprop("/sim/aircraft");
 
+    print("[fgpassengers] start loading aircraft config xml");
     var aircraft_setting = io.read_properties(FG_ROOT ~ "/FGPassengers/Aircraft/" ~ aircraft ~ ".xml", "/fgpassengers");
+    print("[fgpassengers] after loading aircraft config xml");
 
     if (beltSwitchPerAircraft[aircraft]) {
         SEAT_BELT_SWITCH_PROP = beltSwitchPerAircraft[aircraft];
@@ -576,10 +580,12 @@ var beltSwitchSlot = func {
 var mainloopTimer = maketimer(2.0, mainLoop);
 
 var start = func {
+    print("[fgpassengers] start"); 
     var data = io.read_properties("/Applications/FlightGear.app/Contents/Resources/data/Sounds/fgpassengers/fgpassengers-sound.xml", "/sim/sound");
     resetValues();
     showPassengerInfo();
     showAircraftPayloadDialog();
+    print("[fgpassengers] set seat-belts listener " ~ SEAT_BELT_SWITCH_PROP); 
     beltSwitchListenerId = setlistener(SEAT_BELT_SWITCH_PROP, beltSwitchSlot);
     mainloopTimer.start();
     setprop("/sim/messages/copilot", "Start boarding");
@@ -587,4 +593,4 @@ var start = func {
 
 
 
-_setlistener("/sim/signals/nasal-dir-initialized", moduleInit);
+_setlistener("/nasal/fgpassengers/loaded", moduleInit);

@@ -97,7 +97,7 @@
                 <command>nasal</command>
                 <script>
                     setprop("/fgpassengers/start", 1);
-                    passengers.start();
+                    fgpassengers.start();
                 </script>
             </binding>
             <binding>
