@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PropertyList>
+    <name>passenger_setup</name>
+    <width>300</width>
+    <height>240</height>
+    <modal>false</modal>
+    <layout>vbox</layout>
+    <resizable>false</resizable>
+    <default-padding>3</default-padding>
+
+    <group>
+        <layout>hbox</layout>
+        <default-padding>1</default-padding>
+
+        <empty>
+            <stretch>true</stretch>
+        </empty>
+
+        <text>
+            <label>Start FG Passengers</label>
+        </text>
+
+        <empty>
+            <stretch>true</stretch>
+        </empty>
+    </group>
+
+    <group>
+        <layout>hbox</layout>
+        <text>
+            <halign>left</halign>
+            <label>Company:</label>
+        </text>
+
+        <input>
+            <halign>right</halign>
+            <width>300</width>
+            <height>25</height>
+            <property>/fgpassengers/pilot/company</property>
+        </input>
+    </group>
+
+    <group>
+        <layout>hbox</layout>
+        <text>
+            <halign>left</halign>
+            <label>Amount of Passengers:</label>
+        </text>
+
+        <input>
+            <halign>right</halign>
+            <width>300</width>
+            <height>25</height>
+            <property>/fgpassengers/passengers/total</property>
+        </input>
+    </group>
+
+    <group>
+        <layout>hbox</layout>
+        <text>
+            <halign>left</halign>
+            <label>Flight Number:</label>
+        </text>
+
+        <input>
+            <halign>right</halign>
+            <width>300</width>
+            <height>25</height>
+            <property>/fgpassengers/pilot/flightnumber</property>
+        </input>
+    </group>
+
+    <group>
+        <layout>hbox</layout>
+        <halign>fill</halign>
+
+        <empty><stretch>true</stretch></empty>
+
+        <button>
+            <legend>Cancel</legend>
+            <equal>true</equal>
+            <default>true</default>
+            <key>Esc</key>
+            <binding>
+                <command>dialog-close</command>
+            </binding>
+        </button>
+
+        <button>
+            <legend>Start to Load</legend>
+            <equal>true</equal>
+            <default>false</default>
+            <binding>
+                <command>dialog-apply</command>
+            </binding>
+            <binding>
+                <command>nasal</command>
+                <script>
+                    setprop("/fgpassengers/start", 1);
+                    passengers.start();
+                </script>
+            </binding>
+            <binding>
+                <command>dialog-close</command>
+            </binding>
+        </button>
+    </group>
+
+</PropertyList>

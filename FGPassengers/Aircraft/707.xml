@@ -1,0 +1,21 @@
+<PropertyList>
+    <belt>
+        <prop>/b707/call/seat-belts</prop>
+        <use-bool>1</use-bool>
+        <onval>1</onval>
+        <offval>0</offval>
+    </belt>
+    <has-limit>0</has-limit>
+    <aircraft>
+        <limits>
+            <max-flap-extension-speed>
+                <speed>180</speed>
+                <flaps></flaps>
+            </max-flap-extension-speed>
+            <vne>380</vne>
+            <max-gear-extension-speed>250</max-gear-extension-speed>
+            <max-positive-g>2</max-positive-g>
+            <max-negative-g>-1.5</max-negative-g>
+        </limits>
+    </aircraft>
+</PropertyList>
