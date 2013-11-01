@@ -2,8 +2,8 @@
     <belt>
         <prop>/b707/call/seat-belts</prop>
         <use-bool>1</use-bool>
-        <onval>1</onval>
-        <offval>0</offval>
+        <on-value>1</on-value>
+        <off-value>0</off-value>
     </belt>
     <has-limit>0</has-limit>
     <aircraft>
