@@ -1,0 +1,14 @@
+<PropertyList>
+    <fgpasseners>
+      <name>Passengers Screaming</name>
+      <path>FGPassengers/Sounds/Pas_scream.wav</path>
+      <mode>looped</mode>
+      <type>avionics</type>
+      <property>/fgpassengers/sounds/passengers/scream</property>
+      <volume>
+          <property>sim/sound/effects/volume</property>
+      </volume>
+      <reference-dist>10</reference-dist>
+      <max-dist>100</max-dist>
+     </fgpasseners>        
+</PropertyList>
