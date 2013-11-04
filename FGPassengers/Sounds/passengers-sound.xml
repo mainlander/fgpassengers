@@ -4,11 +4,129 @@
       <path>FGPassengers/Sounds/Pas_scream.wav</path>
       <mode>looped</mode>
       <type>avionics</type>
-      <property>/fgpassengers/sounds/passengers/scream</property>
+      <condition>
+          <equals>
+              <property>/fgpassengers/emergency/exceed-g</property>
+              <value>1</value>
+          </equals>
+      </condition>
       <volume>
           <property>sim/sound/effects/volume</property>
       </volume>
       <reference-dist>10</reference-dist>
       <max-dist>100</max-dist>
-     </fgpasseners>        
+    </fgpasseners>        
+    <fgpassengers>
+        <name>Passengers Welcome</name>
+        <path>FGPassengers/Sounds/FsPwelcome.wav</path>
+        <mode>once</mode>
+        <condition>
+            <equals>
+                <property>/fgpassengers/start</property>
+                <value>1</value>
+            </equals>
+        </condition>
+        <position>
+            <x>-35.0</x>
+            <y>0</y>
+            <z>0</z>
+        </position>
+        <reference-dist>65</reference-dist>
+        <max-dist>100</max-dist>
+    </fgpassengers> 
+    <fgpassengers>
+        <name>Emergency Siren</name>
+        <path>FGPassengers/Sounds/Siren.wav</path>
+        <mode>once</mode>
+        <property>/fgpassengers/emergency/siren</property>
+        <position>
+            <x>-55.0</x>
+            <y>0</y>
+            <z>0</z>
+        </position>
+        <reference-dist>350</reference-dist>
+        <max-dist>500</max-dist>
+    </fgpassengers> 
+    <fgpassengers>
+        <name>Applause</name>
+        <path>FGPassengers/Sounds/applause.wav</path>
+        <mode>once</mode>
+        <type>avionics</type>
+        <property>/fgpassengers/emergency/applause</property>
+        <position>
+            <x>-5.0</x>
+            <y>0</y>
+            <z>0</z>
+        </position>
+        <reference-dist>50</reference-dist>
+        <max-dist>100</max-dist>
+    </fgpassengers> 
+    <fgpassengers>
+        <name>CPL Pan</name>
+        <path>FGPassengers/Sounds/crew/cpl_pan.wav</path>
+        <mode>once</mode>
+        <type>avionics</type>
+        <property>/fgpassengers/emergency/pan</property>
+        <volume>
+              <property>sim/sound/effects/volume</property>
+        </volume>
+        <reference-dist>10</reference-dist>
+        <max-dist>100</max-dist>
+    </fgpassengers> 
+    <fgpassengers>
+        <name>CPL Mayday</name>
+        <path>FGPassengers/Sounds/crew/cpl_mayday.wav</path>
+        <mode>once</mode>
+        <type>avionics</type>
+        <property>/fgpassengers/emergency/mayday</property>
+        <volume>
+              <property>sim/sound/effects/volume</property>
+        </volume>
+        <reference-dist>10</reference-dist>
+        <max-dist>100</max-dist>
+    </fgpassengers> 
+    <fgpassengers>
+        <name>CPL Mayday Done</name>
+        <path>FGPassengers/Sounds/crew/cpl_maydaydone.wav</path>
+        <mode>once</mode>
+        <type>avionics</type>
+        <property>/fgpassengers/emergency/mayday</property>
+        <volume>
+              <property>sim/sound/effects/volume</property>
+        </volume>
+        <reference-dist>10</reference-dist>
+        <max-dist>100</max-dist>
+    </fgpassengers> 
+    <fgpassengers>
+        <name>Crew Welcome Onboard</name>
+        <path>FGPassengers/Sounds/crew/crew1_welcomeonboard.wav</path>
+        <mode>once</mode>
+        <property>/fgpassengers/sound/crew/welcomeonboard</property>
+        <volume>
+              <property>sim/sound/effects/volume</property>
+        </volume>
+        <position>
+            <x>-35.0</x>
+            <y>0</y>
+            <z>0</z>
+        </position>
+        <reference-dist>50</reference-dist>
+        <max-dist>100</max-dist>
+    </fgpassengers> 
+    <fgpassengers>
+        <name>Crew Safety Aboard</name>
+        <path>FGPassengers/Sounds/crew/crew2_safetyaboard.wav</path>
+        <mode>once</mode>
+        <property>/fgpassengers/sound/crew/safetyaboard</property>
+        <volume>
+              <property>sim/sound/effects/volume</property>
+        </volume>
+        <position>
+            <x>-35.0</x>
+            <y>0</y>
+            <z>0</z>
+        </position>
+        <reference-dist>50</reference-dist>
+        <max-dist>100</max-dist>
+    </fgpassengers> 
 </PropertyList>

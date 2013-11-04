@@ -212,12 +212,24 @@ var seatbelt = func {
     }
 }
 
+var checkG = func {
+    var pilot_g = getprop("/accelerations/pilot-gdamped");
+    if (pilot_g > 2.0 or pilot_g < -1.5) {
+        setprop("/fgpassengers/emergency/exceed-g", 1);
+    }
+    else {
+        setprop("/fgpassengers/emergency/exceed-g", 0);
+    }
+}
+
 var mainLoop = func {
     if (startBoarding) {
         boarding();
     }
 
     seatbelt();
+
+    checkG();
 
     if (infoDlg != nil) {
         infoDlg.update();
@@ -229,7 +241,6 @@ var resetValues = func {
     setprop("/fgpassengers/passengers/belted", 0);
     setprop("/fgpassengers/passengers/satisfication", 60);
     setprop("/fgpassengers/passengers/fear", 30);
-    setprop("/fgpassengers/sounds/scream", 1);
     belt_settings.update();
     beltSignOn = belt_settings.status;
     startBoarding = 1;
@@ -254,12 +265,13 @@ var start = func {
     #var data = io.read_properties("/Applications/FlightGear.app/Contents/Resources/data/Sounds/fgpassengers/fgpassengers-sound.xml", "/sim/sound");
     resetValues();
     showPassengerInfo();
-    showAircraftPayloadDialog();
+    #showAircraftPayloadDialog();
     print("[fgpassengers] set seat-belts listener " ~ belt_settings.prop); 
     beltSwitchListenerId = setlistener(belt_settings.prop, beltSwitchSlot);
     print("[fgpassengers] set seat-belts listener id " ~ beltSwitchListenerId); 
     mainloopTimer.start();
     setprop("/sim/messages/copilot", "Start boarding");
+    settimer(func { setprop("/fgpassengers/sound/crew/welcomeonboard", 1); }, 40);
 }
 
 
