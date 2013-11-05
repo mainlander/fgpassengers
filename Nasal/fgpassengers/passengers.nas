@@ -42,7 +42,7 @@ var moduleInit = func {
     var aircraft_setting = io.read_properties(FG_ROOT ~ "/FGPassengers/Aircraft/" ~ aircraft ~ ".xml", "/fgpassengers");
     print("[fgpassengers] after loading aircraft config xml");
 
-    belt_settings.prop = getprop("/fgpassengers/belt/prop");
+    belt_settings.prop = getprop("/fgpassengers/belt/prop") or SEAT_BELT_SWITCH_PROP;
     belt_settings.use_bool = getprop("/fgpassengers/belt/use-bool") or 1;
     belt_settings.on_value = getprop("/fgpassengers/belt/on-value") or 1;
     belt_settings.off_value = getprop("/fgpassengers/belt/off-value") or 0;
@@ -167,6 +167,7 @@ var boarding = func {
         var amount = current + delta;
         if (amount >= total) {
             setprop("fgpassengers/passengers/aboard", total);
+            setprop("fgpassengers/passengers/allaboard", 1);
             startBoarding = 0;
             setprop("/sim/messages/copilot", "Passengers are all aboard.");
         }
@@ -212,24 +213,90 @@ var seatbelt = func {
     }
 }
 
-var checkG = func {
+var checkVne = func {
     var pilot_g = getprop("/accelerations/pilot-gdamped");
-    if (pilot_g > 2.0 or pilot_g < -1.5) {
+    if (pilot_g > 1.7 or pilot_g < -1.0) {
         setprop("/fgpassengers/emergency/exceed-g", 1);
+        setprop("/fgpassengers/passengers/fear", 100);
     }
     else {
         setprop("/fgpassengers/emergency/exceed-g", 0);
     }
+    
+    var pos_g_limit = getprop("/limits/max-positive-g") or getprop("/fgpassengers/aircraft/limits/max-positive-g");
+    var neg_g_limit = getprop("/limits/max-negative-g") or getprop("/fgpassengers/aircraft/limits/max-negative-g");
+    
+    if ((pos_g_limit != nil) and (neg_g_limit != nil)) {
+        if (pilot_g > pos_g_limit or pilot_g < neg_g_limit) {
+            setprop("/fgpassengers/report/exceed-g-demaged", 1);
+        }
+    }
+
+    var airspeed = getprop("velocities/airspeed-kt");
+    var vne = getprop("limits/vne") or getprop("/fgpassengers/aircraft/limits/vne");
+
+    if ((airspeed != nil) and (vne != nil) and (airspeed > vne)) {
+        setprop("/fgpassengers/report/exceed-vne", 1);
+        setprop("/fgpassengers/passengers/fear", 100);
+    }
 }
 
-var mainLoop = func {
+var checkGear = func(n) {
+    if (!n.getValue())
+        return;
+
+    var airspeed = getprop("velocities/airspeed-kt");
+    var max_gear = getprop("limits/max-gear-extension-speed") or getprop("/fgpassengers/aircraft/limits/max-gear-extension-speed");
+
+    if ((airspeed != nil) and (max_gear != nil) and (airspeed > max_gear)) {
+        setprop("/fgpassengers/report/exceed-max-gear", 1);
+        setprop("/sim/failure-manager/controls/gear/gear-down/mcbf", 1);
+        setprop("/fgpassengers/sound/fail-gear-flap", 1);
+        settimer(func { setprop("/fgpassengers/soud/fail-gear-flap", 0); }, 5);
+    }
+}
+
+var checkFlaps = func(n) {
+    var flapsetting = n.getValue();
+    if (flapsetting == 0)
+        return;
+
+    var airspeed = getprop("velocities/airspeed-kt");
+ 
+    var limits = (!getprop("/fgpassengers/aircraft/has-limit")) ? props.globals.getNode("/fgpassengers/aircraft/limits") : props.globals.getNode("limits");
+
+    if ((limits != nil) and (limits.getChildren("max-flap-extension-speed") != nil)) {
+        var children = limits.getChildren("max-flap-extension-speed");
+        foreach(var c; children) {
+            if ((c.getChild("flaps") != nil) and (c.getChild("speed") != nil)) {
+                var flaps = c.getChild("flaps").getValue();
+                var speed = c.getChild("speed").getValue();
+
+                if ((flaps != nil) and (speed != nil) and (flapsetting >= flaps) and (airspeed > speed)) {
+                    setprop("/fgpassengers/report/exceed-flap-speed", 1);
+                    setprop("/sim/failure-manager/controls/flight/flaps/mcbf", 1);
+                    setprop("/sim/failure-manager/controls/flight/flaps/serviable", 0);
+                    setprop("/fgpassengers/sound/fail-gear-flap", 1);
+                    settimer(func { setprop("/fgpassengers/soud/fail-gear-flap", 0); }, 5);
+                }
+            }
+        }
+    }
+}
+
+var boardingLoop = func {
     if (startBoarding) {
         boarding();
     }
+    else {
+        boardingTimer.stop();
+    }
+}
 
+
+var mainLoop = func {
     seatbelt();
-
-    checkG();
+    checkVne();
 
     if (infoDlg != nil) {
         infoDlg.update();
@@ -259,6 +326,7 @@ var beltSwitchSlot = func {
 }
 
 var mainloopTimer = maketimer(2.0, mainLoop);
+var boardingTimer = maketimer(5.0, boardingLoop);
 
 var start = func {
     print("[fgpassengers] start"); 
@@ -269,9 +337,16 @@ var start = func {
     print("[fgpassengers] set seat-belts listener " ~ belt_settings.prop); 
     beltSwitchListenerId = setlistener(belt_settings.prop, beltSwitchSlot);
     print("[fgpassengers] set seat-belts listener id " ~ beltSwitchListenerId); 
+    belt_settings.update();
     mainloopTimer.start();
+    if (startBoarding) {
+        boardingTimer.start();
+    }
     setprop("/sim/messages/copilot", "Start boarding");
     settimer(func { setprop("/fgpassengers/sound/crew/welcomeonboard", 1); }, 40);
+    # Set listener for checking flap and gear speed
+    setlistener("controls/flight/flaps", checkFlaps);
+    setlistener("controls/gear/gear-down", checkGear);
 }
 
 

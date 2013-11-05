@@ -9,8 +9,8 @@
     <aircraft>
         <limits>
             <max-flap-extension-speed>
+                <flaps>1</flaps>
                 <speed>180</speed>
-                <flaps></flaps>
             </max-flap-extension-speed>
             <vne>380</vne>
             <max-gear-extension-speed>250</max-gear-extension-speed>

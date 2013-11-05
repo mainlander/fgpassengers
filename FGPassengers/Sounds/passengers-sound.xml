@@ -80,7 +80,7 @@
         <type>avionics</type>
         <property>/fgpassengers/emergency/mayday</property>
         <volume>
-              <property>sim/sound/effects/volume</property>
+            <factor>1</factor>
         </volume>
         <reference-dist>10</reference-dist>
         <max-dist>100</max-dist>
@@ -92,7 +92,7 @@
         <type>avionics</type>
         <property>/fgpassengers/emergency/mayday</property>
         <volume>
-              <property>sim/sound/effects/volume</property>
+            <factor>1</factor>
         </volume>
         <reference-dist>10</reference-dist>
         <max-dist>100</max-dist>
@@ -127,6 +127,58 @@
             <z>0</z>
         </position>
         <reference-dist>50</reference-dist>
+        <max-dist>100</max-dist>
+    </fgpassengers> 
+    <fgpassengers>
+        <name>CPL Stress G</name>
+        <path>FGPassengers/Sounds/crew/cplstress_g.wav</path>
+        <mode>once</mode>
+        <type>avionics</type>
+        <property>/fgpassengers/emergency/exceed-g</property>
+        <volume>
+              <property>sim/sound/effects/volume</property>
+        </volume>
+        <reference-dist>10</reference-dist>
+        <max-dist>100</max-dist>
+    </fgpassengers> 
+    <fgpassengers>
+        <name>CPL Mayday</name>
+        <path>FGPassengers/Sounds/crew/cpl_mayday.wav</path>
+        <mode>once</mode>
+        <type>avionics</type>
+        <property>/fgpassengers/emergency/mayday</property>
+        <volume>
+              <property>sim/sound/effects/volume</property>
+        </volume>
+        <reference-dist>10</reference-dist>
+        <max-dist>100</max-dist>
+    </fgpassengers> 
+    <fgpassengers>
+        <name>Fail Gear Flap</name>
+        <path>FGPassengers/Sounds/fail_gearflap.wav</path>
+        <mode>once</mode>
+        <property>/fgpassengers/sound/fail-gear-flap</property>
+        <volume>
+              <property>sim/sound/effects/volume</property>
+        </volume>
+        <position>
+            <x>-15.0</x>
+            <y>0</y>
+            <z>0</z>
+        </position>
+        <reference-dist>50</reference-dist>
+        <max-dist>100</max-dist>
+    </fgpassengers> 
+    <fgpassengers>
+        <name>Crew All Passengers Aboard</name>
+        <path>FGPassengers/Sounds/crew/crew_allpsg_aboard.wav</path>
+        <mode>once</mode>
+        <type>avionics</type>
+        <property>/fgpassengers/passengers/allaboard</property>
+        <volume>
+            <factor>1</factor>
+        </volume>
+        <reference-dist>10</reference-dist>
         <max-dist>100</max-dist>
     </fgpassengers> 
 </PropertyList>
