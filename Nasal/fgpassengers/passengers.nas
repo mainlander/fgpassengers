@@ -22,6 +22,11 @@ var belt_settings = {
     },
 };
 
+var AircraftStage = {
+    INITIAL: 1, TAXI_DEPART: 2, TAKEOFF: 3, CLIMB: 4, CRUISE: 5, 
+    DESCENT: 6, TOUCHDOWN: 7, TAXI_ARRIVAL: 8, PARK: 9,
+};
+
 var moduleInit = func {
     print("[fgpassengers] module init");
 
@@ -250,7 +255,7 @@ var checkGear = func(n) {
 
     if ((airspeed != nil) and (max_gear != nil) and (airspeed > max_gear)) {
         setprop("/fgpassengers/report/exceed-max-gear", 1);
-        setprop("/sim/failure-manager/controls/gear/gear-down/mcbf", 1);
+        failures.failProp("/controls/gear/gear-down");
         setprop("/fgpassengers/sound/fail-gear-flap", 1);
         settimer(func { setprop("/fgpassengers/soud/fail-gear-flap", 0); }, 5);
     }
@@ -280,13 +285,108 @@ var checkFlaps = func(n) {
 
                 if ((flaps != nil) and (speed != nil) and (flapsetting >= flaps) and (airspeed > speed)) {
                     setprop("/fgpassengers/report/exceed-flap-speed", 1);
-                    setprop("/sim/failure-manager/controls/flight/flaps/mcbf", 1);
-                    setprop("/sim/failure-manager/controls/flight/flaps/serviable", 0);
+                    failures.failProp("/controls/flight/flaps");
                     setprop("/fgpassengers/sound/fail-gear-flap", 1);
                     settimer(func { setprop("/fgpassengers/soud/fail-gear-flap", 0); }, 5);
                 }
             }
         }
+    }
+}
+
+var checkStage = func {
+    var stage = getprop("/fgpassengers/aircraft/stage") or 1;
+
+    if (stage == AircraftStage.INITIAL) {
+        var ground_speed = getprop("/velocities/groundspeed-kt");
+        if ((ground_speed != nil) and ground_speed > 5) {
+            setprop("/fgpassengers/aircraft/stage", AircraftStage.TAXI_DEPART);
+            print("Aircraft Stage to Taxi Depart");
+        }
+    }
+    else if (stage == AircraftStage.TAXI_DEPART) {
+        var ground_speed = getprop("/velocities/groundspeed-kt");
+        if ((ground_speed != nil) and ground_speed > 35) {
+            setprop("/fgpassengers/aircraft/stage", AircraftStage.TAKEOFF);
+            print("Aircraft Stage to Takeoff");
+        }
+    }
+    else if (stage == AircraftStage.TAKEOFF) {
+        var airspeed = getprop("/velocities/airspeed-kt");
+        if ((airspeed != nil) and airspeed < 35) {  # Take-off abort
+            setprop("/fgpassengers/aircraft/stage", AircraftStage.TAXI_DEPART);
+            print("Aircraft Stage back to Taxi Depart");
+        }
+        else {
+            var altitute = getprop("/position/altitude-ft");
+            var ground_alt = getprop("/position/ground-elev-ft");
+            if ((altitute != nil) and (ground_alt != nil)) {
+                if (altitute - ground_alt > 110) {
+                    setprop("/fgpassengers/aircraft/stage", AircraftStage.CLIMB);
+                    print("Aircraft Stage to Climb");
+                }
+            }
+        }
+    }
+    else if (stage == AircraftStage.CLIMB) {
+        var altitute = getprop("/position/altitude-ft");
+        var cruise_alt = getprop("/fgpassengers/aircraft/cruise-altitute");
+        
+        if ((altitute != nil) and (cruise_alt != nil)) {
+            var delta = altitute - cruise_alt;
+            if ((delta > 0 and delta < 200) or (delta < 0 and delta > -200)) {
+                setprop("/fgpassengers/aircraft/stage", AircraftStage.CRUISE);
+                print("Aircraft Stage to Cruise");
+            }
+        }
+    }
+    else if (stage == AircraftStage.CRUISE) {
+        var altitute = getprop("/position/altitude-ft");
+        var cruise_alt = getprop("/fgpassengers/aircraft/cruise-altitute");
+        
+        if ((altitute != nil) and (cruise_alt != nil)) {
+            var delta = cruise_alt - altitute;
+            if (delta > 2000) {
+                setprop("/fgpassengers/aircraft/stage", AircraftStage.DESCENT);
+                print("Aircraft Stage to Descent");
+            }
+        }
+    }
+    else if (stage == AircraftStage.DESCENT) {
+        var altitute = getprop("/position/altitude-ft");
+        var ground_alt = getprop("/position/ground-elev-ft");
+        if ((altitute != nil) and (ground_alt != nil)) {
+            if (altitute - ground_alt < 50) {
+                setprop("/fgpassengers/aircraft/stage", AircraftStage.TOUCHDOWN);
+                print("Aircraft Stage to Touch Down");
+            }
+        }
+    }
+    else if (stage == AircraftStage.TOUCHDOWN) {
+        var ground_speed = getprop("/velocities/groundspeed-kt");
+        if ((ground_speed != nil) and ground_speed < 45) {
+            setprop("/fgpassengers/aircraft/stage", AircraftStage.TAXI_ARRIVAL);
+            print("Aircraft Stage to Taxi Arrival");
+        }
+        else {
+            var altitute = getprop("/position/altitude-ft");
+            var ground_alt = getprop("/position/ground-elev-ft");
+            if ((altitute != nil) and (ground_alt != nil)) {
+                if (altitute - ground_alt > 210) {  # Go around
+                    setprop("/fgpassengers/aircraft/stage", AircraftStage.DESCENT);
+                    print("Aircraft Stage back to Descent");
+                }
+            }
+        }
+    }
+    else if (stage == AircraftStage.TAXI_ARRIVAL) {
+        var ground_speed = getprop("/velocities/groundspeed-kt");
+        if ((ground_speed != nil) and ground_speed < 2) {
+            setprop("/fgpassengers/aircraft/stage", AircraftStage.PARK);
+            print("Aircraft Stage to Park");
+        }
+    }
+    else if (stage == AircraftStage.PARK) {
     }
 }
 
@@ -303,6 +403,7 @@ var boardingLoop = func {
 var mainLoop = func {
     seatbelt();
     checkVne();
+    checkStage();
 
     if (infoDlg != nil) {
         infoDlg.update();
@@ -314,6 +415,8 @@ var resetValues = func {
     setprop("/fgpassengers/passengers/belted", 0);
     setprop("/fgpassengers/passengers/satisfication", 60);
     setprop("/fgpassengers/passengers/fear", 30);
+    setprop("/fgpassengers/aircraft/stage", AircraftStage.INITIAL);
+    setprop("/fgpassengers/aircraft/cruise-altitute", 500);
     belt_settings.update();
     beltSignOn = belt_settings.status;
     startBoarding = 1;
@@ -336,6 +439,7 @@ var boardingTimer = maketimer(5.0, boardingLoop);
 
 var start = func {
     print("[fgpassengers] start"); 
+    setprop("/fgpassengers/start", 1);
     #var data = io.read_properties("/Applications/FlightGear.app/Contents/Resources/data/Sounds/fgpassengers/fgpassengers-sound.xml", "/sim/sound");
     resetValues();
     showPassengerInfo();
