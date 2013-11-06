@@ -262,8 +262,13 @@ var checkFlaps = func(n) {
         return;
 
     var airspeed = getprop("velocities/airspeed-kt");
+
+    var limits = props.globals.getNode("limits");
+    if (limits == nil and getprop("/fgpassengers/aircraft/has-limit")) {
+        limits = props.globals.getNode("/fgpassengers/aircraft/limits");
+    }
  
-    var limits = (!getprop("/fgpassengers/aircraft/has-limit")) ? props.globals.getNode("/fgpassengers/aircraft/limits") : props.globals.getNode("limits");
+    print("FGPassengers get limit: " ~ (limits != nil));
 
     if ((limits != nil) and (limits.getChildren("max-flap-extension-speed") != nil)) {
         var children = limits.getChildren("max-flap-extension-speed");
@@ -271,6 +276,7 @@ var checkFlaps = func(n) {
             if ((c.getChild("flaps") != nil) and (c.getChild("speed") != nil)) {
                 var flaps = c.getChild("flaps").getValue();
                 var speed = c.getChild("speed").getValue();
+                print("flaps:" ~ flaps ~ " speed:" ~ speed);
 
                 if ((flaps != nil) and (speed != nil) and (flapsetting >= flaps) and (airspeed > speed)) {
                     setprop("/fgpassengers/report/exceed-flap-speed", 1);
