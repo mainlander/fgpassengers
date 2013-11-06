@@ -17,5 +17,7 @@
             <max-positive-g>2</max-positive-g>
             <max-negative-g>-1.5</max-negative-g>
         </limits>
+        <gear-amount>3</gear-amount>
+        <crahsed>/b707/crashed</crahsed>
     </aircraft>
 </PropertyList>

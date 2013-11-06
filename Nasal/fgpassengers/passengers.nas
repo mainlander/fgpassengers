@@ -51,6 +51,8 @@ var moduleInit = func {
     belt_settings.use_bool = getprop("/fgpassengers/belt/use-bool") or 1;
     belt_settings.on_value = getprop("/fgpassengers/belt/on-value") or 1;
     belt_settings.off_value = getprop("/fgpassengers/belt/off-value") or 0;
+
+    setLoadProps();
 }
 
 
@@ -434,6 +436,26 @@ var beltSwitchSlot = func {
     }
 }
 
+var gearWoW = func (n) {
+    print("gear WOW");
+    var wow = n.getValue() or 0.0;
+    var dn_speed = getprop("/velocities/speed-down-fps");
+    if (wow and dn_speed and dn_speed > 50) {
+        print("Hard landing!");
+        setprop("/fgpassengers/report/hard-landing", 1);
+    }
+}
+
+var crashedSlot = func (n) {
+    print("crashedSlot");
+    var crashed = n.getValue() or 0;
+    print("crashed:" ~ crashed);
+    if (crashed) {
+        print("Aircraft Crashed!");
+        setprop("/fgpassengers/report/crashed", 1);
+    }
+}
+
 var mainloopTimer = maketimer(2.0, mainLoop);
 var boardingTimer = maketimer(5.0, boardingLoop);
 
@@ -443,7 +465,7 @@ var start = func {
     #var data = io.read_properties("/Applications/FlightGear.app/Contents/Resources/data/Sounds/fgpassengers/fgpassengers-sound.xml", "/sim/sound");
     resetValues();
     showPassengerInfo();
-    #showAircraftPayloadDialog();
+    showAircraftPayloadDialog();
     print("[fgpassengers] set seat-belts listener " ~ belt_settings.prop); 
     beltSwitchListenerId = setlistener(belt_settings.prop, beltSwitchSlot);
     print("[fgpassengers] set seat-belts listener id " ~ beltSwitchListenerId); 
@@ -457,8 +479,74 @@ var start = func {
     # Set listener for checking flap and gear speed
     setlistener("controls/flight/flaps", checkFlaps);
     setlistener("controls/gear/gear-down", checkGear);
+    var gear_amount = getprop("/fgpassengers/aircraft/gear-amount") or 3;
+    for (var i = 0; i < gear_amount; i = i + 1) {
+        setlistener("/gear/gear[" ~ i ~ "]/wow", gearWoW, 0, 0);
+    }
+    var crashed_prop = getprop("/fgpassengers/aircraft/crashed") or "/sim/crashed";
+    if (crashed_prop != nil) {
+        print("has crashed_prop");
+        setlistener(crashed_prop, crashedSlot, 0, 0);
+    }
 }
 
+var calculatePayload = func {
+    var payload_base = props.globals.getNode("/fgpassengers/aircraft/payload");
+    if (payload_base != nil)
+        var wgts = payload_base.getChildren("item");
+    else
+        var wgts = [];
 
+    var weights = {};
+    var total_pax = 0;
+
+    for (var i = 0; i < size(wgts); i += 1) {
+        var w = wgts[i];
+        var value = w.getNode("value", 1).getValue() or 0.0;
+        var unit = w.getNode("unit", 1).getValue() or "lbs";
+        var type = w.getNode("type", 1).getValue() or "lbs";
+        var wprop = w.getNode("property", 1).getValue();
+
+        var real_value = value;
+        if (unit == 'pax') {
+            real_value = value * 180.0;  # One passeger 180 pounds
+        }
+        if (type == "pax") {
+            total_pax += value;
+        }
+
+        if (wprop != nil) {
+            if (contains(weights, wprop)) {
+                var orgval = weights[wprop];
+                weights[wprop] = orgval + real_value;
+            }
+            else {
+                weights[wprop] = real_value;
+            }
+        }
+    }
+
+    foreach (wprop; keys(weights)) {
+        var value = weights[wprop];
+        print("set prop "~ wprop ~ " with weight " ~ value);
+        setprop(wprop ~ "/weight-lb", value);
+    }
+
+    setprop("/fgpassengers/payload/total-pax", total_pax);
+}
+
+var setLoadProps = func {
+    var payload_base = props.globals.getNode("/fgpassengers/aircraft/payload");
+    if (payload_base != nil)
+        var wgts = payload_base.getChildren("item");
+    else
+        var wgts = [];
+
+    for (var i = 0; i < size(wgts); i += 1) {
+        var w = wgts[i];
+        var wprop = "/fgpassengers/aircraft/payload/item[" ~ i ~ "]";
+        setlistener(wprop ~ "/value", calculatePayload);
+    }
+}
 
 _setlistener("/nasal/fgpassengers/loaded", moduleInit);

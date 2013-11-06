@@ -69,9 +69,21 @@ var showAircraftPayloadDialog = func {
     company.set("row", 0);
     company.set("col", 1);
     company.set("halign", "left");
-    company.set("label", "0123457890123456789");
+    #company.set("label", "0123457890123456789");
     company.set("property", "/fgpassengers/pilot/company");
     company.set("live", 1);
+    var pilotLabel = flightArea.addChild("text");
+    pilotLabel.set("row", 0);
+    pilotLabel.set("col", 2);
+    pilotLabel.set("halign", "right");
+    pilotLabel.set("label", "Pilot Name:");
+    var pilotName = flightArea.addChild("input");
+    pilotName.set("row", 0);
+    pilotName.set("col", 3);
+    pilotName.set("halign", "left");
+    pilotName.set("property", "/fgpassengers/pilot/name");
+    pilotName.set("live", 1);
+
 
     dialog[name].addChild("hrule");
 
@@ -267,72 +279,57 @@ var showAircraftPayloadDialog = func {
     weightArea.addChild("empty").set("stretch", 1);
 
     tcell(weightTable, "text", 0, 0).set("label", "Location");
-    tcell(weightTable, "text", 0, 2).set("label", "Pounds");
+    tcell(weightTable, "text", 0, 2).set("label", "Pax");
+    tcell(weightTable, "text", 0, 3).set("label", "Pounds");
 
-    var payload_base = props.globals.getNode(fdmdata.payload);
+    var payload_base = props.globals.getNode("/fgpassengers/aircraft/payload");
     if (payload_base != nil)
-        var wgts = payload_base.getChildren("weight");
+        var wgts = payload_base.getChildren("item");
     else
         var wgts = [];
-    for(var i=0; i<size(wgts); i+=1) {
+    for (var i = 0; i < size(wgts); i += 1) {
         var w = wgts[i];
         var wname = w.getNode("name", 1).getValue();
-        var wprop = fdmdata.payload ~ "/weight[" ~ i ~ "]";
+        var wprop = "/fgpassengers/aircraft/payload/item[" ~ i ~ "]";
 
-        var title = tcell(weightTable, "text", i+1, 0);
+        var title = tcell(weightTable, "text", i + 1, 0);
         title.set("label", wname);
         title.set("halign", "right");
 
-        if(w.getNode("opt") != nil) {
-            var combo = tcell(weightTable, "combo", i+1, 1);
-            combo.set("property", wprop ~ "/selected");
-            combo.set("pref-width", 300);
+        var slider = tcell(weightTable, "slider", i + 1, 1);
+        slider.set("property", wprop ~ "/value");
+        var min = w.getNode("min", 1).getValue();
+        var max = w.getNode("max", 1).getValue();
+        slider.set("min", min != nil ? min : 0);
+        slider.set("max", max != nil ? max : 100);
+        slider.set("live", 1);
+        slider.setBinding("dialog-apply");
 
-            # Simple code we'd like to use:
-            #foreach(opt; w.getChildren("opt")) {
-            #    var ent = combo.addChild("value");
-            #    ent.prop().setValue(opt.getNode("name", 1).getValue());
-            #}
-
-            # More complicated workaround to move the "current" item
-            # into the first slot, because dialog.cxx doesn't set the
-            # selected item in the combo box.
-            var opts = [];
-            var curr = w.getNode("selected");
-            curr = curr == nil ? "" : curr.getValue();
-            foreach(opt; w.getChildren("opt")) {
-                append(opts, opt.getNode("name", 1).getValue());
-            }
-            forindex(oi; opts) {
-                if(opts[oi] == curr) {
-                    var tmp = opts[0];
-                    opts[0] = opts[oi];
-                    opts[oi] = tmp;
-                    break;
-                }
-            }
-            foreach(opt; opts) {
-                combo.addChild("value").prop().setValue(opt);
-            }
-
-            combo.setBinding("dialog-apply");
-            combo.setBinding("nasal", "gui.weightChangeHandler()");
-        } else {
-            var slider = tcell(weightTable, "slider", i+1, 1);
-            slider.set("property", wprop ~ "/weight-lb");
-            var min = w.getNode("min-lb", 1).getValue();
-            var max = w.getNode("max-lb", 1).getValue();
-            slider.set("min", min != nil ? min : 0);
-            slider.set("max", max != nil ? max : 100);
-            slider.set("live", 1);
-            slider.setBinding("dialog-apply");
+        var pax = tcell(weightTable, "text", i + 1, 2);
+        if (w.getNode("unit", 1).getValue() == "pax") {
+            pax.set("property", wprop ~ "/value"); 
+            pax.set("label", "0123456");
+            pax.set("format", "%.0f");
+            pax.set("live", 1);
+        }
+        else {
+            pax.set("label", "");
+            pax.set("live", 0);
         }
 
-        var lbs = tcell(weightTable, "text", i+1, 2);
-        lbs.set("property", wprop ~ "/weight-lb");
-        lbs.set("label", "0123456");
-        lbs.set("format", "%.0f");
-        lbs.set("live", 1);
+        var lbs = tcell(weightTable, "text", i + 1, 3);
+        if (w.getNode("unit", 1).getValue() == "lbs") {
+            lbs.set("property", wprop ~ "/value");
+            lbs.set("label", "0123456");
+            lbs.set("format", "%.0f");
+            lbs.set("live", 1);
+        }
+        else {
+            lbs.set("property", wprop ~ "/value-lbs");
+            lbs.set("label", "0123456");
+            lbs.set("format", "%.0f");
+            lbs.set("live", 1);
+        }
     }
 
     var bar = tcell(weightTable, "hrule", size(wgts)+1, 0);
@@ -343,7 +340,7 @@ var showAircraftPayloadDialog = func {
     total_label.set("halign", "left");
 
     var lbs = tcell(weightTable, "text",size(wgts) +2, 2);
-    lbs.set("property", "b707/passengers/load-weight");
+    lbs.set("property", "/fgpassengers/payload/total-pax");
     lbs.set("label", "0123456");
     lbs.set("format", "%.0f" );
     lbs.set("halign", "right");
