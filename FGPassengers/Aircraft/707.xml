@@ -19,5 +19,70 @@
         </limits>
         <gear-amount>3</gear-amount>
         <crahsed>/b707/crashed</crahsed>
+        <payload>
+            <item>
+                <name>Crew</name>
+                <type>other</type>
+                <unit>pax</unit>
+                <max>10</max>
+                <min>3</min>
+                <value>3</value>
+                <property>/payload/weight[0]</property>
+            </item>
+            <item>
+                <name>First-class</name>
+                <type>pax</type>
+                <unit>pax</unit>
+                <max>33</max>
+                <min>0</min>
+                <value>0</value>
+                <property>/payload/weight[1]</property>
+            </item>
+            <item>
+                <name>Second-class / wing</name>
+                <type>pax</type>
+                <unit>pax</unit>
+                <max>55</max>
+                <min>0</min>
+                <value>0</value>
+                <property>/payload/weight[2]</property>
+            </item>
+            <item>
+                <name>Second-class / rear</name>
+                <type>pax</type>
+                <unit>pax</unit>
+                <max>74</max>
+                <min>0</min>
+                <value>0</value>
+                <property>/payload/weight[3]</property>
+            </item>
+            <item>
+                <name>Luggage 1 - front</name>
+                <type>baggage</type>
+                <unit>lbs</unit>
+                <max>6000</max>
+                <min>0</min>
+                <value>0</value>
+                <property>/payload/weight[4]</property>
+            </item>
+            <item>
+                <name>Luggage 2 - center</name>
+                <type>baggage</type>
+                <unit>lbs</unit>
+                <max>10000</max>
+                <min>0</min>
+                <value>0</value>
+                <property>/payload/weight[5]</property>
+            </item>
+            <item>
+                <name>Luggage 3 - rear</name>
+                <type>baggage</type>
+                <unit>lbs</unit>
+                <max>10000</max>
+                <min>0</min>
+                <value>0</value>
+                <property>/payload/weight[6]</property>
+            </item>
+        </payload>
     </aircraft>
 </PropertyList>
