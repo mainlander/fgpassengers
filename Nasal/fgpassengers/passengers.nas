@@ -28,7 +28,7 @@ var belt_settings = {
 
 var AircraftStage = {
     INITIAL: 1, TAXI_DEPART: 2, TAKEOFF: 3, CLIMB: 4, CRUISE: 5, 
-    DESCENT: 6, TOUCHDOWN: 7, TAXI_ARRIVAL: 8, PARK: 9,
+    DESCENT: 6, APPROACH: 7, TOUCHDOWN: 8, TAXI_ARRIVAL: 9, PARK: 10,
 };
 
 var moduleInit = func {
@@ -377,9 +377,23 @@ var checkStage = func {
         var altitute = getprop("/position/altitude-ft");
         var ground_alt = getprop("/position/ground-elev-ft");
         if ((altitute != nil) and (ground_alt != nil)) {
+            if (altitute - ground_alt < 2500) {
+                setprop("/fgpassengers/aircraft/stage", AircraftStage.APPROACH);
+                print("Aircraft Stage to APPROACH");
+            }
+        }
+    }
+    else if (stage == AircraftStage.APPROACH) {
+        var altitute = getprop("/position/altitude-ft");
+        var ground_alt = getprop("/position/ground-elev-ft");
+        if ((altitute != nil) and (ground_alt != nil)) {
             if (altitute - ground_alt < 50) {
                 setprop("/fgpassengers/aircraft/stage", AircraftStage.TOUCHDOWN);
                 print("Aircraft Stage to Touch Down");
+            }
+            else if (altitute - ground_alt > 2500) {
+                setprop("/fgpassengers/aircraft/stage", AircraftStage.DESCENT);
+                print("Aircraft Stage back to Descent");
             }
         }
     }
@@ -394,8 +408,8 @@ var checkStage = func {
             var ground_alt = getprop("/position/ground-elev-ft");
             if ((altitute != nil) and (ground_alt != nil)) {
                 if (altitute - ground_alt > 210) {  # Go around
-                    setprop("/fgpassengers/aircraft/stage", AircraftStage.DESCENT);
-                    print("Aircraft Stage back to Descent");
+                    setprop("/fgpassengers/aircraft/stage", AircraftStage.APPROACH);
+                    print("Aircraft Stage back to Approach");
                 }
             }
         }
