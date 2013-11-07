@@ -2,9 +2,9 @@ var dialog = {};
 
 var fdm = getprop("/sim/flight-model");
 
-var showAircraftPayloadDialog = func {
-    var name = "FGAircarftPayload";
-    var title = "Aircraft Payload";
+var showFGPassengersStartDialog = func {
+    var name = "FGPassengersStart";
+    var title = "FG Passengers - Start a flight";
 
     #
     # General Dialog Structure
@@ -12,7 +12,7 @@ var showAircraftPayloadDialog = func {
     dialog[name] = gui.Widget.new();
     dialog[name].set("name", name);
     dialog[name].set("layout", "vbox");
-    dialog[name].setColor(0, 0, 1, 0.7);
+    #dialog[name].setColor(0, 0, 1, 0.7);
 
     var header = dialog[name].addChild("group");
     header.set("layout", "hbox");
@@ -71,7 +71,6 @@ var showAircraftPayloadDialog = func {
     company.set("halign", "left");
     #company.set("label", "0123457890123456789");
     company.set("property", "/fgpassengers/pilot/company");
-    company.set("live", 1);
     var pilotLabel = flightArea.addChild("text");
     pilotLabel.set("row", 0);
     pilotLabel.set("col", 2);
@@ -82,8 +81,37 @@ var showAircraftPayloadDialog = func {
     pilotName.set("col", 3);
     pilotName.set("halign", "left");
     pilotName.set("property", "/fgpassengers/pilot/name");
-    pilotName.set("live", 1);
-
+    var flightNumberLabel = flightArea.addChild("text");
+    flightNumberLabel.set("row", 1);
+    flightNumberLabel.set("col", 0);
+    flightNumberLabel.set("halign", "right");
+    flightNumberLabel.set("label", "Flight Number:");
+    var flightNumber = flightArea.addChild("input");
+    flightNumber.set("row", 1);
+    flightNumber.set("col", 1);
+    flightNumber.set("halign", "left");
+    flightNumber.set("property", "/fgpassengers/flight/number");
+    var cruiseAltLabel = flightArea.addChild("text");
+    cruiseAltLabel.set("row", 1);
+    cruiseAltLabel.set("col", 2);
+    cruiseAltLabel.set("halign", "right");
+    cruiseAltLabel.set("label", "Cruising Altitute (ft):");
+    var cruiseAlt = flightArea.addChild("input");
+    cruiseAlt.set("row", 1);
+    cruiseAlt.set("col", 3);
+    cruiseAlt.set("halign", "left");
+    cruiseAlt.set("property", "/fgpassengers/flight/cruise-altitute");
+    var destinationLabel = flightArea.addChild("text");
+    destinationLabel.set("row", 1);
+    destinationLabel.set("col", 4);
+    destinationLabel.set("halign", "right");
+    destinationLabel.set("label", "Destination:");
+    var destination = flightArea.addChild("input");
+    destination.set("row", 1);
+    destination.set("col", 5);
+    destination.set("halign", "left");
+    destination.set("property", "/fgpassengers/flight/destination");
+    
 
     dialog[name].addChild("hrule");
 
@@ -153,8 +181,15 @@ var showAircraftPayloadDialog = func {
     var close = buttonBar.addChild("button");
     close.set("legend", "Close");
     close.set("default", "true");
-    close.set("key", "Enter");
+    close.set("key", "Esc");
     close.setBinding("dialog-close");
+
+    var start = buttonBar.addChild("button");
+    start.set("legend", "Start to Load");
+    start.set("default", "false");
+    start.setBinding("dialog-apply");
+    start.setBinding("nasal", "fgpassengers.start(); ");
+    start.setBinding("dialog-close");
 
     # Temporary helper function
     var tcell = func(parent, type, row, col) {

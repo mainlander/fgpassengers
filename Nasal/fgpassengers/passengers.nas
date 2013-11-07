@@ -8,14 +8,18 @@ var belt_settings = {
     status: 0,
     update: func {
         var prop = getprop(belt_settings.prop);
-        if (me.use_bool) {
+        if (me.use_bool == 1) {
+            print("belt use bool and current " ~ prop);
             me.status = prop ? 1 : 0;
         }
         else {
+            print("belt not use bool");
             if (prop == me.on_value) {
+                print("belt sign on");
                 me.status = 1;
             }
             else if (prop == me.off_value) {
+                print("belt sign off");
                 me.status = 0;
             }
         }
@@ -46,11 +50,22 @@ var moduleInit = func {
     print("[fgpassengers] start loading aircraft config xml");
     var aircraft_setting = io.read_properties(FG_ROOT ~ "/FGPassengers/Aircraft/" ~ aircraft ~ ".xml", "/fgpassengers");
     print("[fgpassengers] after loading aircraft config xml");
+    if (aircraft_setting == nil) {
+        print("[fgpassengers] No aircraft config xml");
+    }
 
-    belt_settings.prop = getprop("/fgpassengers/belt/prop") or SEAT_BELT_SWITCH_PROP;
-    belt_settings.use_bool = getprop("/fgpassengers/belt/use-bool") or 1;
-    belt_settings.on_value = getprop("/fgpassengers/belt/on-value") or 1;
-    belt_settings.off_value = getprop("/fgpassengers/belt/off-value") or 0;
+    if (getprop("/fgpassengers/belt/prop") != nil) {
+        belt_settings.prop = getprop("/fgpassengers/belt/prop");
+    }
+    if (getprop("/fgpassengers/belt/use-bool") != nil) {
+        belt_settings.use_bool = getprop("/fgpassengers/belt/use-bool");
+    }
+    if (getprop("/fgpassengers/belt/on-value") != nil) {
+        belt_settings.on_value = getprop("/fgpassengers/belt/on-value");
+    }
+    if (getprop("/fgpassengers/belt/off-value") != nil) {
+        belt_settings.off_value = getprop("/fgpassengers/belt/off-value");
+    }
 
     setLoadProps();
 }
@@ -68,6 +83,10 @@ var PassengerInfoDlg = {
         mydlg = canvas.Window.new([270, 85]);
         var my_canvas = mydlg.createCanvas()
                              .setColorBackground(0,0,1,0.7);
+
+        my_canvas.addEventListener("drag", func(e) {
+            mydlg.move(e.deltaX, e.deltaY);
+        });
 
         var root = my_canvas.createGroup();
 
@@ -332,7 +351,7 @@ var checkStage = func {
     }
     else if (stage == AircraftStage.CLIMB) {
         var altitute = getprop("/position/altitude-ft");
-        var cruise_alt = getprop("/fgpassengers/aircraft/cruise-altitute");
+        var cruise_alt = getprop("/fgpassengers/flight/cruise-altitute");
         
         if ((altitute != nil) and (cruise_alt != nil)) {
             var delta = altitute - cruise_alt;
@@ -344,7 +363,7 @@ var checkStage = func {
     }
     else if (stage == AircraftStage.CRUISE) {
         var altitute = getprop("/position/altitude-ft");
-        var cruise_alt = getprop("/fgpassengers/aircraft/cruise-altitute");
+        var cruise_alt = getprop("/fgpassengers/flight/cruise-altitute");
         
         if ((altitute != nil) and (cruise_alt != nil)) {
             var delta = cruise_alt - altitute;
@@ -418,7 +437,7 @@ var resetValues = func {
     setprop("/fgpassengers/passengers/satisfication", 60);
     setprop("/fgpassengers/passengers/fear", 30);
     setprop("/fgpassengers/aircraft/stage", AircraftStage.INITIAL);
-    setprop("/fgpassengers/aircraft/cruise-altitute", 500);
+    setprop("/fgpassengers/flight/belt-sign", 0);
     belt_settings.update();
     beltSignOn = belt_settings.status;
     startBoarding = 1;
@@ -440,7 +459,7 @@ var gearWoW = func (n) {
     print("gear WOW");
     var wow = n.getValue() or 0.0;
     var dn_speed = getprop("/velocities/speed-down-fps");
-    if (wow and dn_speed and dn_speed > 50) {
+    if (wow and dn_speed and dn_speed > 20) {
         print("Hard landing!");
         setprop("/fgpassengers/report/hard-landing", 1);
     }
@@ -456,6 +475,10 @@ var crashedSlot = func (n) {
     }
 }
 
+var beginSettings = func {
+    showFGPassengersStartDialog();
+}
+
 var mainloopTimer = maketimer(2.0, mainLoop);
 var boardingTimer = maketimer(5.0, boardingLoop);
 
@@ -465,7 +488,6 @@ var start = func {
     #var data = io.read_properties("/Applications/FlightGear.app/Contents/Resources/data/Sounds/fgpassengers/fgpassengers-sound.xml", "/sim/sound");
     resetValues();
     showPassengerInfo();
-    showAircraftPayloadDialog();
     print("[fgpassengers] set seat-belts listener " ~ belt_settings.prop); 
     beltSwitchListenerId = setlistener(belt_settings.prop, beltSwitchSlot);
     print("[fgpassengers] set seat-belts listener id " ~ beltSwitchListenerId); 
@@ -533,6 +555,7 @@ var calculatePayload = func {
     }
 
     setprop("/fgpassengers/payload/total-pax", total_pax);
+    setprop("/fgpassengers/passengers/total", total_pax);
 }
 
 var setLoadProps = func {

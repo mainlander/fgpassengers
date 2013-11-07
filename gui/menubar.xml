@@ -701,8 +701,10 @@
                     <name>start-a-flight</name>
                     <label>Start a flight</label>
                     <binding>
-                        <command>dialog-show</command>
-                        <dialog-name>passenger_setup</dialog-name>
+                        <command>nasal</command>
+                        <script>
+                            fgpassengers.beginSettings();
+                        </script>
                     </binding>
                 </item>
                 <item>
@@ -711,7 +713,7 @@
                     <binding>
                         <command>nasal</command>
                         <script>
-                            passengers.togglePassengerInfo();
+                            fgpassengers.togglePassengerInfo();
                         </script>
                     </binding>
                 </item>
