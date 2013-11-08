@@ -698,7 +698,17 @@
                 <name>fgpassengers</name>
                 <label>FG Passengers</label>
                 <item>
-                    <name>start-a-flight</name>
+                    <name>fgp-company-pilot</name>
+                    <label>Company and pilot info</label>
+                    <binding>
+                        <command>nasal</command>
+                        <script>
+                            fgpassengers.showCompanyPilotDialog();
+                        </script>
+                    </binding>
+                </item>
+                <item>
+                    <name>fgpassengers-start-a-flight</name>
                     <label>Start a flight</label>
                     <binding>
                         <command>nasal</command>
@@ -708,13 +718,33 @@
                     </binding>
                 </item>
                 <item>
-                    <name>passengers-info</name>
+                    <name>fgpassengers-info</name>
                     <label>Toggle passenger info window</label>
+                    <enabled>false</enabled>
                     <binding>
                         <command>nasal</command>
                         <script>
                             fgpassengers.togglePassengerInfo();
                         </script>
+                    </binding>
+                </item>
+                <item>
+                    <name>fgpassengers-toggle-belt-sign</name>
+                    <label>Toggle Belt Sign</label>
+                    <enabled>false</enabled>
+                    <binding>
+                        <command>property-toggle</command>
+                        <property>/fgpassengers/flight/belt-sign</property>
+                    </binding>
+                </item>
+                <item>
+                    <name>fgpassengers-end-flight</name>
+                    <label>End flight</label>
+                    <enabled>false</enabled>
+                    <binding>
+                        <command>property-assign</command>
+                        <property>/fgpassengers/start</property>
+                        <value>0</value>
                     </binding>
                 </item>
         </menu>

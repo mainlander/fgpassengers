@@ -34,6 +34,8 @@ var AircraftStage = {
 var moduleInit = func {
     print("[fgpassengers] module init");
 
+    readSettings();
+
     setprop("/fgpassengers/start", 0);
 
     var FG_ROOT = getprop("/sim/fg-root");
@@ -68,6 +70,35 @@ var moduleInit = func {
     }
 
     setLoadProps();
+}
+
+var saveSettings = func {
+    var FG_HOME = getprop("/sim/fg-home");
+    var save_data = io.write_properties(FG_HOME ~ "/Export/fgpassengers-settings.xml", "/fgpassengers/settings");
+    return (save_data != nil) ? 1 : 0;
+}
+
+var readSettings = func {
+    var FG_HOME = getprop("/sim/fg-home");
+    var settings_data = io.read_properties(FG_HOME ~ "/Export/fgpassengers-settings.xml", "/fgpassengers/settings");
+    if (settings_data == nil) {
+        print("Not FGPassengers settings");
+        setprop("/fgpassengers/settings/company/name", "Default Company");
+        setprop("/fgpassengers/settings/company/reputation", 10);
+        setprop("/fgpassengers/settings/company/fund", 100000);
+        setprop("/fgpassengers/settings/pilot/name", "Default Pilot");
+        setprop("/fgpassengers/settings/pilot/level", 1);
+        setprop("/fgpassengers/settings/pilot/score", 0);
+        if (saveSettings()) {
+            print("Save Settings success");
+        }
+        else {
+            print("Save Settings failed");
+        }
+    }
+    else {
+        print("Has FGPassengers settings");
+    }
 }
 
 
@@ -512,6 +543,14 @@ var start = func {
     }
     setprop("/sim/messages/copilot", "Start boarding");
     settimer(func { setprop("/fgpassengers/sound/crew/welcomeonboard", 1); }, 40);
+    # Menu items enable
+    gui.menuEnable("fgpassengers-end-flight", 1);
+    if (belt_settings.prop == SEAT_BELT_SWITCH_PROP) {
+        gui.menuEnable("fgpassengers-toggle-belt-sign", 1);
+    }
+    gui.menuEnable("fgpassengers-info", 1);
+    gui.menuEnable("fgpassengers-start-a-flight", 0);
+
     # Set listener for checking flap and gear speed
     setlistener("controls/flight/flaps", checkFlaps);
     setlistener("controls/gear/gear-down", checkGear);
@@ -535,6 +574,7 @@ var calculatePayload = func {
 
     var weights = {};
     var total_pax = 0;
+    var total_lbs = 0.0;
 
     for (var i = 0; i < size(wgts); i += 1) {
         var w = wgts[i];
@@ -545,10 +585,10 @@ var calculatePayload = func {
 
         var real_value = value;
         if (unit == 'pax') {
-            real_value = value * 180.0;  # One passeger 180 pounds
+            real_value = int(value) * 180.0;  # One passeger 180 pounds
         }
         if (type == "pax") {
-            total_pax += value;
+            total_pax += int(value);
         }
 
         if (wprop != nil) {
@@ -560,6 +600,7 @@ var calculatePayload = func {
                 weights[wprop] = real_value;
             }
         }
+        total_lbs += real_value;
     }
 
     foreach (wprop; keys(weights)) {
@@ -570,6 +611,7 @@ var calculatePayload = func {
 
     setprop("/fgpassengers/payload/total-pax", total_pax);
     setprop("/fgpassengers/passengers/total", total_pax);
+    setprop("/fgpassengers/payload/total-lbs", total_lbs);
 }
 
 var setLoadProps = func {

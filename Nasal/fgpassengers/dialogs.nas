@@ -2,6 +2,80 @@ var dialog = {};
 
 var fdm = getprop("/sim/flight-model");
 
+var showCompanyPilotDialog = func {
+    var name = "FGPassengersCompanyPilot";
+    var title = "Company and Pilot";
+    #
+    # General Dialog Structure
+    #
+    dialog[name] = gui.Widget.new();
+    dialog[name].set("name", name);
+    dialog[name].set("layout", "vbox");
+
+    var header = dialog[name].addChild("group");
+    header.set("layout", "hbox");
+    header.addChild("empty").set("stretch", "1");
+    header.addChild("text").set("label", title);
+    header.addChild("empty").set("stretch", "1");
+    var w = header.addChild("button");
+    w.set("pref-width", 16);
+    w.set("pref-height", 16);
+    w.set("legend", "");
+    w.set("default", 0);
+    w.setBinding("dialog-close");
+
+    dialog[name].addChild("hrule");
+
+    var propArea = dialog[name].addChild("group");
+    propArea.set("layout", "table");
+    propArea.set("halign", "center");
+    var companyLabel = propArea.addChild("text");
+    companyLabel.set("row", 0);
+    companyLabel.set("col", 0);
+    companyLabel.set("halign", "right");
+    companyLabel.set("label", "Company:");
+    var company = propArea.addChild("input");
+    company.set("row", 0);
+    company.set("col", 1);
+    company.set("halign", "left");
+    company.set("pref-width", 200);
+    company.set("property", "/fgpassengers/settings/company/name");
+    var pilotLabel = propArea.addChild("text");
+    pilotLabel.set("row", 1);
+    pilotLabel.set("col", 0);
+    pilotLabel.set("halign", "right");
+    pilotLabel.set("label", "Pilot Name:");
+    var pilotName = propArea.addChild("input");
+    pilotName.set("row", 1);
+    pilotName.set("col", 1);
+    pilotName.set("halign", "left");
+    pilotName.set("pref-width", 200);
+    pilotName.set("property", "/fgpassengers/settings/pilot/name");
+
+    dialog[name].addChild("hrule");
+
+    var buttonBar = dialog[name].addChild("group");
+    buttonBar.set("layout", "hbox");
+    buttonBar.set("default-padding", 10);
+
+    var close = buttonBar.addChild("button");
+    close.set("legend", "Close");
+    close.set("default", "true");
+    close.set("key", "Esc");
+    close.setBinding("dialog-close");
+
+    var save = buttonBar.addChild("button");
+    save.set("legend", "Save");
+    save.set("default", "false");
+    save.setBinding("dialog-apply");
+    save.setBinding("nasal", "fgpassengers.saveSettings(); ");
+    save.setBinding("dialog-close");
+
+    # All done: pop it up
+    fgcommand("dialog-new", dialog[name].prop());
+    gui.showDialog(name);
+}
+
 var showFGPassengersStartDialog = func {
     var name = "FGPassengersStart";
     var title = "FG Passengers - Start a flight";
@@ -65,22 +139,21 @@ var showFGPassengersStartDialog = func {
     companyLabel.set("col", 0);
     companyLabel.set("halign", "right");
     companyLabel.set("label", "Company:");
-    var company = flightArea.addChild("input");
+    var company = flightArea.addChild("text");
     company.set("row", 0);
     company.set("col", 1);
     company.set("halign", "left");
-    #company.set("label", "0123457890123456789");
-    company.set("property", "/fgpassengers/pilot/company");
+    company.set("property", "/fgpassengers/settings/company/name");
     var pilotLabel = flightArea.addChild("text");
     pilotLabel.set("row", 0);
     pilotLabel.set("col", 2);
     pilotLabel.set("halign", "right");
     pilotLabel.set("label", "Pilot Name:");
-    var pilotName = flightArea.addChild("input");
+    var pilotName = flightArea.addChild("text");
     pilotName.set("row", 0);
     pilotName.set("col", 3);
     pilotName.set("halign", "left");
-    pilotName.set("property", "/fgpassengers/pilot/name");
+    pilotName.set("property", "/fgpassengers/settings/pilot/name");
     var flightNumberLabel = flightArea.addChild("text");
     flightNumberLabel.set("row", 1);
     flightNumberLabel.set("col", 0);
@@ -338,6 +411,7 @@ var showFGPassengersStartDialog = func {
         slider.set("min", min != nil ? min : 0);
         slider.set("max", max != nil ? max : 100);
         slider.set("live", 1);
+        slider.set("step", 1.0);
         slider.setBinding("dialog-apply");
 
         var pax = tcell(weightTable, "text", i + 1, 2);
@@ -374,8 +448,14 @@ var showFGPassengersStartDialog = func {
     total_label.set("label", "Total Load/Passengers");
     total_label.set("halign", "left");
 
-    var lbs = tcell(weightTable, "text",size(wgts) +2, 2);
-    lbs.set("property", "/fgpassengers/payload/total-pax");
+    var pax = tcell(weightTable, "text",size(wgts) +2, 2);
+    pax.set("property", "/fgpassengers/payload/total-pax");
+    pax.set("label", "0123456");
+    pax.set("format", "%.0f" );
+    pax.set("halign", "right");
+    pax.set("live", 1);
+    var lbs = tcell(weightTable, "text",size(wgts) +2, 3);
+    lbs.set("property", "/fgpassengers/payload/total-lbs");
     lbs.set("label", "0123456");
     lbs.set("format", "%.0f" );
     lbs.set("halign", "right");
