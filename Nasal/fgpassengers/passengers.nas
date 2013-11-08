@@ -353,6 +353,7 @@ var checkStage = func {
         var ground_speed = getprop("/velocities/groundspeed-kt");
         if ((ground_speed != nil) and ground_speed > 5) {
             setprop("/fgpassengers/aircraft/stage", AircraftStage.TAXI_DEPART);
+            setprop("/fgpassengers/sound/crew/safetyaboard", 1);  # Play Safty Instruction Sound
             print("Aircraft Stage to Taxi Depart");
         }
     }
@@ -491,6 +492,7 @@ var resetValues = func {
 
 var beltSwitchSlot = func {
     print("[fgpassengers] belt slot!");
+    preStatus = belt_settings.status;
     belt_settings.update();
     beltSignOn = belt_settings.status;
     print("[fgpassengers] belt sign:" ~ beltSignOn);
@@ -498,13 +500,21 @@ var beltSwitchSlot = func {
         print("[fgpassengers] info update!");
         infoDlg.update();
     }
+    if ((preStatus != beltSignOn) and beltSignOn) {
+        settimer(func { setprop("/fgpassengers/sound/crew/fasten-seat-belt", 1); }, 3);
+        settimer(func { setprop("/fgpassengers/sound/crew/fasten-seat-belt", 0); }, 9);
+    }
+    else if ((preStatus != beltSignOn) and !beltSignOn) {
+        settimer(func { setprop("/fgpassengers/sound/crew/unfasten-seat-belt", 1); }, 3);
+        settimer(func { setprop("/fgpassengers/sound/crew/unfasten-seat-belt", 0); }, 11);
+    }
 }
 
 var gearWoW = func (n) {
     print("gear WOW");
     var wow = n.getValue() or 0.0;
     var dn_speed = getprop("/velocities/speed-down-fps");
-    if (wow and dn_speed and dn_speed > 20) {
+    if (wow and dn_speed and dn_speed > 10) {
         print("Hard landing!");
         setprop("/fgpassengers/report/hard-landing", 1);
     }
@@ -586,6 +596,7 @@ var calculatePayload = func {
         var real_value = value;
         if (unit == 'pax') {
             real_value = int(value) * 180.0;  # One passeger 180 pounds
+            setprop(w.getPath() ~ "/value-lbs", real_value);
         }
         if (type == "pax") {
             total_pax += int(value);

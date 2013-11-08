@@ -1,0 +1,60 @@
+<PropertyList>
+    <belt>
+        <prop>/controls/switches/seatbelt-sign</prop>
+        <use-bool>1</use-bool>
+        <on-value>1</on-value>
+        <off-value>0</off-value>
+    </belt>
+    <has-limit>1</has-limit>
+    <aircraft>
+        <gear-amount>5</gear-amount>
+        <crahsed>/sim/crashed</crahsed>
+        <payload>
+            <item>
+                <name>Crew</name>
+                <type>other</type>
+                <unit>pax</unit>
+                <max>6</max>
+                <min>1</min>
+                <value>2</value>
+                <property>/payload/weight[0]</property>
+            </item>
+            <item>
+                <name>Passenger</name>
+                <type>pax</type>
+                <unit>pax</unit>
+                <max>380</max>
+                <min>0</min>
+                <value>0</value>
+                <property>/payload/weight[1]</property>
+            </item>
+            <item>
+                <name>Fwd Cargo</name>
+                <type>baggage</type>
+                <unit>lbs</unit>
+                <max>14500</max>
+                <min>0</min>
+                <value>2000</value>
+                <property>/payload/weight[2]</property>
+            </item>
+            <item>
+                <name>Aft Cargo</name>
+                <type>baggage</type>
+                <unit>lbs</unit>
+                <max>4000</max>
+                <min>0</min>
+                <value>2000</value>
+                <property>/payload/weight[3]</property>
+            </item>
+            <item>
+                <name>Rear Bulk Cargo</name>
+                <type>baggage</type>
+                <unit>lbs</unit>
+                <max>14500</max>
+                <min>0</min>
+                <value>4500</value>
+                <property>/payload/weight[4]</property>
+            </item>
+        </payload>
+    </aircraft>
+</PropertyList>

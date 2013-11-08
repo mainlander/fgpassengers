@@ -460,7 +460,9 @@ var showFGPassengersStartDialog = func {
     lbs.set("format", "%.0f" );
     lbs.set("halign", "right");
     lbs.set("live", 1);
-    
+
+    # Calculate Payload
+    calculatePayload();
 
     # All done: pop it up
     fgcommand("dialog-new", dialog[name].prop());
