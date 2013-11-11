@@ -40,13 +40,6 @@ var moduleInit = func {
 
     var FG_ROOT = getprop("/sim/fg-root");
 
-    var beltSwitchPerAircraft = {
-        '707': '/b707/call/seat-belts',
-        'A330-303': '/controls/switches/seatbelt-sign',
-        'A330-323': '/controls/switches/seatbelt-sign',
-        'A330-343': '/controls/switches/seatbelt-sign',
-    };
-
     var aircraft = getprop("/sim/aircraft");
 
     print("[fgpassengers] start loading aircraft config xml");
@@ -54,6 +47,10 @@ var moduleInit = func {
     print("[fgpassengers] after loading aircraft config xml");
     if (aircraft_setting == nil) {
         print("[fgpassengers] No aircraft config xml");
+        setprop("/fgpassengers/aircraft/support", 0);
+    }
+    else {
+        setprop("/fgpassengers/aircraft/support", 1);
     }
 
     if (getprop("/fgpassengers/belt/prop") != nil) {
@@ -466,6 +463,11 @@ var boardingLoop = func {
     }
 }
 
+var satisficationMeasure = func {
+}
+
+var fearMeasure = func {
+}
 
 var mainLoop = func {
     seatbelt();

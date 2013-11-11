@@ -2,6 +2,10 @@ var dialog = {};
 
 var fdm = getprop("/sim/flight-model");
 
+var showDialog = func(name) {
+    fgcommand("dialog-show", props.Node.new({ "dialog-name" : name }));
+}
+
 var showCompanyPilotDialog = func {
     var name = "FGPassengersCompanyPilot";
     var title = "Company and Pilot";
@@ -102,9 +106,19 @@ var showFGPassengersStartDialog = func {
 
     dialog[name].addChild("hrule");
 
-    
-
     if (fdm != "yasim" and fdm != "jsb") {
+        var msg = dialog[name].addChild("text");
+        msg.set("label", "Not supported for this aircraft");
+        var cancel = dialog[name].addChild("button");
+        cancel.set("key", "Esc");
+        cancel.set("legend", "Cancel");
+        cancel.setBinding("dialog-close");
+        fgcommand("dialog-new", dialog[name].prop());
+        showDialog(name);
+        return;
+    }
+    var support = getprop("/fgpassengers/aircraft/support");
+    if ((support == nil) or (support == 0)) {
         var msg = dialog[name].addChild("text");
         msg.set("label", "Not supported for this aircraft");
         var cancel = dialog[name].addChild("button");
